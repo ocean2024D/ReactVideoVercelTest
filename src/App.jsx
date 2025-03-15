@@ -54,6 +54,7 @@ function App() {
                 <FontAwesomeIcon icon={faShare} size="2x" className="text-white" />
                 <span className="text-sm">5.4K</span>
               </div>
+              <FontAwesomeIcon icon={faSearch} size="lg" />
              
             </div>
  
@@ -64,16 +65,15 @@ function App() {
           
         ))}
         {/* Bottom Icons and Buy Button */}
-              <div className="absolute  bottom-0 flex justify-center gap-14 items-center text-white m-4 ">
-        <FontAwesomeIcon icon={faHome} size="lg" />
-       
-        <FontAwesomeIcon icon={faSearch} size="lg" />
-        <FontAwesomeIcon icon={faPlus} size="2x" className="text-white border-2 border-white rounded-full p-1" />
-        <FontAwesomeIcon icon={faUser} size="lg" />
-        <button className="bg-orange-400 text-white px-6 py-3 rounded-full font-bold hover:bg-red-700 transition ">
-                Satın Al
-              </button>
-      </div>
+        <div className="flex justify-center gap-14 items-center text-white m-4 absolute bottom-0 transform translate-x-1/2">
+  <FontAwesomeIcon icon={faHome} size="lg" />
+  <FontAwesomeIcon icon={faPlus} size="2x" className="text-white border-2 border-white rounded-full p-1" />
+  <FontAwesomeIcon icon={faUser} size="lg" />
+  <button className="bg-orange-400 text-white px-6 py-3 rounded-full font-bold hover:bg-red-700 transition ">
+    Satın Al
+  </button>
+</div>
+
     
       </div>
 
