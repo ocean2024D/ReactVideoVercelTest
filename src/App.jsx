@@ -65,7 +65,7 @@ function App() {
           
         ))}
         {/* Bottom Icons and Buy Button */}
-        <div className="flex justify-center gap-14 items-center text-white m-4 absolute bottom-0 left-1/2 transform -translate-x-1/2">
+        <div className="flex justify-center gap-14 items-center text-white m-4 absolute bottom-0.5 left-1/2 transform -translate-x-1/2">
   <FontAwesomeIcon icon={faHome} size="lg" />
   <FontAwesomeIcon icon={faPlus} size="2x" className="text-white border-2 border-white rounded-full p-1" />
   <FontAwesomeIcon icon={faUser} size="lg" />
