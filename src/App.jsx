@@ -1,22 +1,25 @@
 import React, { useState } from "react";
-import CloudinaryUploadWidget from "./Components/CloudinaryUploadWidget";
+import CloudinaryUploadWidget from "./Components/CloudinaryUploadWidget"
 import VideoList from "./Components/VideoList";
+
+
 const App = () => {
-  const [imageUrl, setImageUrl] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
 
   return (
     <div>
-      <h1>Upload Video</h1>
-      <CloudinaryUploadWidget setImageUrl={setImageUrl} />
-      {imageUrl && <video src={imageUrl} controls width="400" />}
-    
-      <div>
-      <h1>Test Videos</h1>
+      <CloudinaryUploadWidget setVideoUrl={setVideoUrl} />
+      {videoUrl && (
+        <div>
+          <h3>Yüklenen Video:</h3>
+          <video width="320" height="240" controls>
+            <source src={videoUrl} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      )}
       <VideoList />
     </div>
-    
-    </div>
-    
   );
 };
 
