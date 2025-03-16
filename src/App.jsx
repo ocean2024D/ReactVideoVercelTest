@@ -11,7 +11,7 @@ import {
   faHeart,
   faCommentDots,
   faShare,
-  faSpinner, // Yüklenme animasyonu için
+  faSpinner,
 } from "@fortawesome/free-solid-svg-icons";
 
 const videos = [v1, v2, v3];
@@ -21,7 +21,7 @@ function App() {
   const [isPlaying, setIsPlaying] = useState(true);
   const videoRefs = useRef([]);
   const [loadedVideos, setLoadedVideos] = useState([]);
-  const [loading, setLoading] = useState(videos.map(() => true)); // Her video için loading durumu
+  const [loading, setLoading] = useState(videos.map(() => true));
 
   const updateProgress = (index) => {
     if (videoRefs.current[index]) {
@@ -49,7 +49,6 @@ function App() {
     }
   };
 
-  // Lazy load için Intersection Observer kullanımı
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -93,14 +92,13 @@ function App() {
               ref={(el) => (videoRefs.current[index] = el)}
               className="w-full h-screen object-cover my-2"
               loop
-              muted
+              preload="auto" // Optimize loading speed
               autoPlay={loadedVideos.includes(index.toString())}
               data-index={index}
               src={loadedVideos.includes(index.toString()) ? video : ""}
               poster="https://via.placeholder.com/300"
               onClick={() => handlePlayPause(index)}
               onLoadedData={() => {
-                // Video yüklendiğinde loading durumunu kaldır
                 setLoading((prev) => {
                   const newLoading = [...prev];
                   newLoading[index] = false;
