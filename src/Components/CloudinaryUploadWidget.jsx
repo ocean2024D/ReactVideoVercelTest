@@ -1,26 +1,30 @@
-import { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { Cloudinary } from "@cloudinary/url-gen";
 
-const CloudinaryUploadWidget = () => {
+const CloudinaryUploadWidget = ({ setImageUrl }) => {
+  const cloudinaryRef = useRef();
+  const widgetRef = useRef();
+
   useEffect(() => {
-    if (window.cloudinary) {
-      const widget = window.cloudinary.createUploadWidget(
-        {
-          cloudName: "YOUR_CLOUD_NAME", // Cloudinary Cloud Name
-          uploadPreset: "YOUR_UPLOAD_PRESET", // Upload preset
-        },
-        (error, result) => {
-          if (!error && result.event === "success") {
-            console.log("File uploaded successfully: ", result.info.secure_url);
-          } else {
-            console.error("Error in file upload", error);
-          }
+    cloudinaryRef.current = window.cloudinary;
+    widgetRef.current = cloudinaryRef.current.createUploadWidget(
+      {
+        cloudName: "dbkdulf98", // Cloudinary'deki cloud isminiz
+        uploadPreset: "my_preset", // Upload Preset'iniz
+      },
+      (error, result) => {
+        if (!error && result.event === "success") {
+          setImageUrl(result.info.secure_url); // Yüklenen görüntü URL'sini al
         }
-      );
-      widget && widget.open();
-    }
+      }
+    );
   }, []);
 
-  return <div>Upload Widget</div>;
+  return (
+    <button onClick={() => widgetRef.current.open()} className="p-2 bg-blue-500 text-white">
+      Upload Image
+    </button>
+  );
 };
 
 export default CloudinaryUploadWidget;
