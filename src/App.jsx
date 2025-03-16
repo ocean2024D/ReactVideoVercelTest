@@ -97,7 +97,6 @@ function App() {
               ref={(el) => (videoRefs.current[index] = el)}
               className="w-full h-screen object-cover my-2"
               loop
-              muted // Start with muted
               preload="auto" // Load video as fast as possible
               autoPlay={loadedVideos.includes(index.toString())}
               data-index={index}
