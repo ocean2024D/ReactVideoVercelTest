@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import v1 from "./assets/v1.mp4";
 import v3 from "./assets/v3.mp4"; 
+import v2 from "./assets/v2.mp4"; 
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -9,7 +10,7 @@ import {
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
 
-const videos = [v1, v3];
+const videos = [v1, v2, v3];
 
 function App() {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
@@ -44,14 +45,14 @@ function App() {
   };
 
   const handleSpeedChange = () => {
-    const newSpeed = speed === 1 ? 2 : (speed === 2 ? 0.5 : 1); 
+    const newSpeed = speed === 1 ? 2 : (speed === 2 ? 0.5 : 1); // hız döngüsü 1x -> 2x -> 0.5x -> 1x
     setSpeed(newSpeed);
     if (videoRef.current) {
-      videoRef.current.playbackRate = newSpeed; 
+      videoRef.current.playbackRate = newSpeed; // Video hızını ayarla
     }
   };
 
-  // Video oynatmaya başlamak için useEffect 
+  // Video oynatmaya başlamak için useEffect ekleyelim
   useEffect(() => {
     const video = videoRef.current;
     if (video) {
@@ -65,7 +66,7 @@ function App() {
   }, []);
 
   return (
-    <div className="h-screen w-full bg-black flex flex-col relative">
+    <div className="h-screen w-full bg-black flex flex-col relative ">
       <div className="flex-grow overflow-y-auto snap-mandatory snap-y" style={{ scrollSnapType: "y mandatory" }}>
         {videos.map((video, index) => (
           <div key={index} className="relative w-full h-screen snap-start">
@@ -73,7 +74,7 @@ function App() {
               ref={videoRef}
               className="w-full h-screen object-cover my-2"
               loop
-             
+              muted
               autoPlay // Otomatik oynatma özelliği
               src={video}
               onClick={handlePlayPause} // Videoya tıklandığında oynat/durdur işlemi yapılacak
