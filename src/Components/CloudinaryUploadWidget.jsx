@@ -1,29 +1,41 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Cloudinary } from "@cloudinary/url-gen";
 
-const CloudinaryUploadWidget = ({ setImageUrl }) => {
-  const cloudinaryRef = useRef();
-  const widgetRef = useRef();
 
+import React, { useEffect } from "react";
+
+const CloudinaryUploadWidget = ({ setVideoUrl }) => {
   useEffect(() => {
-    cloudinaryRef.current = window.cloudinary;
-    widgetRef.current = cloudinaryRef.current.createUploadWidget(
+    const cloudinaryWidget = window.cloudinary.createUploadWidget(
       {
-        cloudName: "dbkdulf98", // Cloudinary'deki cloud isminiz
-        uploadPreset: "my_preset", // Upload Preset'iniz
+           cloudName: "dbkdulf98", // Cloudinary'deki cloud isminiz
+        uploadPreset: "my_preset",  // Cloudinary upload preset'inizi buraya ekleyin
+        sources: ["local", "url", "camera"],
+        resourceType: "video",
+        showAdvancedOptions: false,
+        cropping: false,
+        multiple: false,
+        theme: "minimal",
       },
       (error, result) => {
-        if (!error && result.event === "success") {
-          setImageUrl(result.info.secure_url); // Yüklenen görüntü URL'sini al
+        if (result.event === "success") {
+          setVideoUrl(result.info.secure_url); // Yüklenen video URL'sini alıp parent komponent'e ilet
         }
       }
     );
-  }, []);
+
+    return () => {
+      cloudinaryWidget.close(); // Temizleme işlemi
+    };
+  }, [setVideoUrl]);
 
   return (
-    <button onClick={() => widgetRef.current.open()} className="p-2 bg-blue-500 text-white">
-      Upload Image
-    </button>
+    <div className="absolute top-4 left-4">
+      <button
+        onClick={() => window.cloudinary.openUploadWidget()}
+        className="bg-blue-500 text-white px-4 py-2 rounded-md"
+      >
+        Video Yükle
+      </button>
+    </div>
   );
 };
 
