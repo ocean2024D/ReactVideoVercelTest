@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import v1 from "./assets/v1.mp4";
-import v3 from "./assets/v3.mp4"; 
-import v2 from "./assets/v2.mp4"; 
+import v2 from "./assets/v2.mp4";
+import v3 from "./assets/v3.mp4";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -11,6 +11,7 @@ import {
   faHeart,
   faCommentDots,
   faShare,
+  faSpinner, // Yüklenme animasyonu için
 } from "@fortawesome/free-solid-svg-icons";
 
 const videos = [v1, v2, v3];
@@ -18,50 +19,61 @@ const videos = [v1, v2, v3];
 function App() {
   const [progress, setProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
-  const videoRef = useRef(null);
-  const [likes, setLikes] = useState(120);
-  const [comments, setComments] = useState(45);
-  const [shares, setShares] = useState(10);
-  const [liked, setLiked] = useState(false);
+  const videoRefs = useRef([]);
+  const [loadedVideos, setLoadedVideos] = useState([]);
+  const [loading, setLoading] = useState(videos.map(() => true)); // Her video için loading durumu
 
-  const updateProgress = () => {
-    if (videoRef.current) {
-      const currentProgress = (videoRef.current.currentTime / videoRef.current.duration) * 100;
+  const updateProgress = (index) => {
+    if (videoRefs.current[index]) {
+      const currentProgress =
+        (videoRefs.current[index].currentTime / videoRefs.current[index].duration) * 100;
       setProgress(currentProgress);
     }
   };
 
-  const handleProgressChange = (e) => {
-    if (videoRef.current) {
-      const newTime = (e.target.value / 100) * videoRef.current.duration;
-      videoRef.current.currentTime = newTime;
+  const handleProgressChange = (e, index) => {
+    if (videoRefs.current[index]) {
+      const newTime = (e.target.value / 100) * videoRefs.current[index].duration;
+      videoRefs.current[index].currentTime = newTime;
     }
   };
 
-  const handlePlayPause = () => {
-    if (videoRef.current) {
+  const handlePlayPause = (index) => {
+    if (videoRefs.current[index]) {
       if (isPlaying) {
-        videoRef.current.pause();
+        videoRefs.current[index].pause();
       } else {
-        videoRef.current.play();
+        videoRefs.current[index].play();
       }
       setIsPlaying(!isPlaying);
     }
   };
 
-  const handleLike = () => {
-    setLiked(!liked);
-    setLikes(liked ? likes - 1 : likes + 1);
-  };
-
+  // Lazy load için Intersection Observer kullanımı
   useEffect(() => {
-    const video = videoRef.current;
-    if (video) {
-      video.play();
-    }
-    video.addEventListener("timeupdate", updateProgress);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setLoadedVideos((prev) => [...new Set([...prev, entry.target.dataset.index])]);
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    videoRefs.current.forEach((video, index) => {
+      if (video) {
+        observer.observe(video);
+      }
+    });
+
     return () => {
-      video.removeEventListener("timeupdate", updateProgress);
+      videoRefs.current.forEach((video) => {
+        if (video) {
+          observer.unobserve(video);
+        }
+      });
     };
   }, []);
 
@@ -69,14 +81,32 @@ function App() {
     <div className="h-screen w-full bg-black flex flex-col relative">
       <div className="flex-grow overflow-y-auto snap-mandatory snap-y">
         {videos.map((video, index) => (
-          <div key={index} className="relative w-full h-screen snap-start">
+          <div key={index} className="relative w-full h-screen snap-start flex justify-center items-center">
+            {/* Loading Spinner */}
+            {loading[index] && (
+              <div className="absolute flex items-center justify-center text-white">
+                <FontAwesomeIcon icon={faSpinner} size="3x" className="animate-spin" />
+              </div>
+            )}
+
             <video
-              ref={videoRef}
+              ref={(el) => (videoRefs.current[index] = el)}
               className="w-full h-screen object-cover my-2"
               loop
-              autoPlay 
-              src={video}
-              onClick={handlePlayPause}
+              muted
+              autoPlay={loadedVideos.includes(index.toString())}
+              data-index={index}
+              src={loadedVideos.includes(index.toString()) ? video : ""}
+              poster="https://via.placeholder.com/300"
+              onClick={() => handlePlayPause(index)}
+              onLoadedData={() => {
+                // Video yüklendiğinde loading durumunu kaldır
+                setLoading((prev) => {
+                  const newLoading = [...prev];
+                  newLoading[index] = false;
+                  return newLoading;
+                });
+              }}
             ></video>
           </div>
         ))}
@@ -89,29 +119,24 @@ function App() {
           min="0"
           max="100"
           value={progress}
-          onChange={handleProgressChange}
+          onChange={(e) => handleProgressChange(e, 0)}
           className="w-full"
         />
       </div>
 
       {/* Right-Side Icons */}
       <div className="absolute bottom-36 m-2 right-4 flex flex-col items-center gap-4 text-white">
-        {/* Like Button */}
-        <div className="flex flex-col items-center cursor-pointer" onClick={handleLike}>
-          <FontAwesomeIcon icon={faHeart} size="2x" className={liked ? "text-red-500" : "text-white"} />
-          <span className="text-sm">{likes}</span>
+        <div className="flex flex-col items-center cursor-pointer">
+          <FontAwesomeIcon icon={faHeart} size="2x" className="text-white" />
+          <span className="text-sm">120</span>
         </div>
-
-        {/* Comment Button */}
         <div className="flex flex-col items-center cursor-pointer">
           <FontAwesomeIcon icon={faCommentDots} size="2x" />
-          <span className="text-sm">{comments}</span>
+          <span className="text-sm">45</span>
         </div>
-
-        {/* Share Button */}
         <div className="flex flex-col items-center cursor-pointer">
           <FontAwesomeIcon icon={faShare} size="2x" />
-          <span className="text-sm">{shares}</span>
+          <span className="text-sm">10</span>
         </div>
       </div>
 
