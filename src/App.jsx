@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import v1 from "./assets/v1.mp4";
 import v2 from "./assets/v2.mp4";
 import v3 from "./assets/v3.mp4";
-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faHome,
@@ -53,13 +52,18 @@ function App() {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
+          const videoIndex = entry.target.dataset.index;
+          const video = videoRefs.current[videoIndex];
+          
           if (entry.isIntersecting) {
             // When video comes into view, load it and play it
-            setLoadedVideos((prev) => [...new Set([...prev, entry.target.dataset.index])]);
-            videoRefs.current[entry.target.dataset.index].muted = false;
+            setLoadedVideos((prev) => [...new Set([...prev, videoIndex])]);
+            video.muted = false;
+            video.play();  // Play the video when it is in view
           } else {
-            // When video goes out of view, mute it
-            videoRefs.current[entry.target.dataset.index].muted = true;
+            // When video goes out of view, mute it and pause
+            video.muted = true;
+            video.pause();
           }
         });
       },
