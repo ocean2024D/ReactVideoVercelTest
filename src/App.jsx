@@ -54,7 +54,12 @@ function App() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
+            // When video comes into view, load it and play it
             setLoadedVideos((prev) => [...new Set([...prev, entry.target.dataset.index])]);
+            videoRefs.current[entry.target.dataset.index].muted = false;
+          } else {
+            // When video goes out of view, mute it
+            videoRefs.current[entry.target.dataset.index].muted = true;
           }
         });
       },
@@ -92,7 +97,8 @@ function App() {
               ref={(el) => (videoRefs.current[index] = el)}
               className="w-full h-screen object-cover my-2"
               loop
-              preload="auto" // Optimize loading speed
+              muted // Start with muted
+              preload="auto" // Load video as fast as possible
               autoPlay={loadedVideos.includes(index.toString())}
               data-index={index}
               src={loadedVideos.includes(index.toString()) ? video : ""}
