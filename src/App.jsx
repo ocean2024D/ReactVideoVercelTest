@@ -1,86 +1,108 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import v1 from "./assets/v1.mp4";
-
 import v3 from "./assets/v3.mp4"; 
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faHeart,
-  faCommentDots,
-  faShare,
-  faPlus,
   faHome,
-  faSearch,
+  faPlus,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
 
-const videos = [v1,v3]; 
+const videos = [v1, v3];
 
 function App() {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [speed, setSpeed] = useState(1); // Video hızı (1: normal, 2: 2x hız, 0.5: yarım hız)
+  const videoRef = useRef(null);
+
+  const updateProgress = () => {
+    if (videoRef.current) {
+      const currentProgress = (videoRef.current.currentTime / videoRef.current.duration) * 100;
+      setProgress(currentProgress);
+    }
+  };
+
+  const handleProgressChange = (e) => {
+    if (videoRef.current) {
+      const newTime = (e.target.value / 100) * videoRef.current.duration;
+      videoRef.current.currentTime = newTime;
+    }
+  };
+
+  const handlePlayPause = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleSpeedChange = () => {
+    const newSpeed = speed === 1 ? 2 : (speed === 2 ? 0.5 : 1); 
+    setSpeed(newSpeed);
+    if (videoRef.current) {
+      videoRef.current.playbackRate = newSpeed; 
+    }
+  };
+
+  // Video oynatmaya başlamak için useEffect 
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      video.play();
+    }
+    video.addEventListener("timeupdate", updateProgress);
+
+    return () => {
+      video.removeEventListener("timeupdate", updateProgress);
+    };
+  }, []);
 
   return (
-    <div className="h-screen w-full bg-black flex flex-col ">
-   
-
-      {/* Video Field */}
-      <div
-        className="flex-grow overflow-y-auto snap-mandatory snap-y "
-        style={{ scrollSnapType: "y mandatory" }} 
-      >
+    <div className="h-screen w-full bg-black flex flex-col relative">
+      <div className="flex-grow overflow-y-auto snap-mandatory snap-y" style={{ scrollSnapType: "y mandatory" }}>
         {videos.map((video, index) => (
-          <div
-            key={index}
-            className="relative w-full h-screen snap-start"
-          >
+          <div key={index} className="relative w-full h-screen snap-start">
             <video
-              className="w-full h-screen object-cover my-2" 
-              autoPlay
+              ref={videoRef}
+              className="w-full h-screen object-cover my-2"
               loop
-              muted
-              src={video}
-            ></video>
-              {/*Right Icons */}
-            <div className="absolute top-1/4 right-4 flex flex-col items-center gap-6 text-white">
-              <div className="flex flex-col items-center">
-                <FontAwesomeIcon icon={faHeart} size="2x" className="text-red-500" />
-                <span className="text-sm">120.5K</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <FontAwesomeIcon icon={faCommentDots} size="2x" className="text-white" />
-                <span className="text-sm">15.2K</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <FontAwesomeIcon icon={faShare} size="2x" className="text-white" />
-                <span className="text-sm">5.4K</span>
-              </div>
-              <FontAwesomeIcon icon={faSearch} size="lg" />
              
-            </div>
- 
-
-          
-          
+              autoPlay // Otomatik oynatma özelliği
+              src={video}
+              onClick={handlePlayPause} // Videoya tıklandığında oynat/durdur işlemi yapılacak
+            ></video>
           </div>
-          
         ))}
-     {/* Bottom Icons and Buy Button */}
-<div className="flex justify-center gap-14 items-center text-white m-4 absolute bottom-0 left-1/2 transform -translate-x-1/2">
-  <FontAwesomeIcon icon={faHome} size="lg" />
-  <FontAwesomeIcon icon={faPlus} size="2x" className="text-white border-2 border-white rounded-full p-1" />
-  <FontAwesomeIcon icon={faUser} size="lg" />
-  <button className="bg-orange-400 text-white px-6 py-3 rounded-full font-bold hover:bg-red-700 transition ">
-    Satın Al
-  </button>
-</div>
-
-
-
-    
-
       </div>
 
-  
+      {/* Video Control Bar */}
+      <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 w-full px-4">
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value={progress}
+          onChange={handleProgressChange}
+          className="w-full"
+        />
+      </div>
+
+      {/* Bottom Icons and Buy Button */}
+      <div className="flex justify-center gap-14 items-center text-white m-4 absolute bottom-0 left-1/2 transform -translate-x-1/2">
+        <FontAwesomeIcon icon={faHome} size="lg" />
+        <FontAwesomeIcon icon={faPlus} size="2x" className="text-white border-2 border-white rounded-full p-1" />
+        <FontAwesomeIcon icon={faUser} size="lg" />
+        <button className="bg-orange-400 text-white px-6 py-3 rounded-full font-bold hover:bg-red-700 transition">
+          Satın Al
+        </button>
+      </div>
     </div>
   );
 }
