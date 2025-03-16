@@ -74,7 +74,6 @@ function App() {
               ref={videoRef}
               className="w-full h-screen object-cover my-2"
               loop
-              muted
               autoPlay 
               src={video}
               onClick={handlePlayPause}
