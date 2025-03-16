@@ -1,41 +1,33 @@
+import React, { useEffect, useRef, useState } from "react";
 
+const CloudinaryUploadWidget = ({ setImageUrl }) => {
+  const cloudinaryRef = useRef();
+  const widgetRef = useRef();
 
-import React, { useEffect } from "react";
-
-const CloudinaryUploadWidget = ({ setVideoUrl }) => {
   useEffect(() => {
-    const cloudinaryWidget = window.cloudinary.createUploadWidget(
-      {
-           cloudName: "dbkdulf98", // Cloudinary'deki cloud isminiz
-        uploadPreset: "my_preset",  // Cloudinary upload preset'inizi buraya ekleyin
-        sources: ["local", "url", "camera"],
-        resourceType: "video",
-        showAdvancedOptions: false,
-        cropping: false,
-        multiple: false,
-        theme: "minimal",
-      },
-      (error, result) => {
-        if (result.event === "success") {
-          setVideoUrl(result.info.secure_url); // Yüklenen video URL'sini alıp parent komponent'e ilet
+    // Ensure cloudinary is loaded
+    if (window.cloudinary) {
+      cloudinaryRef.current = window.cloudinary;
+      widgetRef.current = cloudinaryRef.current.createUploadWidget(
+        {
+          cloudName: "dbkdulf98", // Your Cloudinary cloud name
+          uploadPreset: "my_preset", // Your upload preset
+        },
+        (error, result) => {
+          if (!error && result.event === "success") {
+            setImageUrl(result.info.secure_url); // Get the uploaded image URL
+          }
         }
-      }
-    );
-
-    return () => {
-      cloudinaryWidget.close(); // Temizleme işlemi
-    };
-  }, [setVideoUrl]);
+      );
+    } else {
+      console.error("Cloudinary script is not loaded.");
+    }
+  }, []);
 
   return (
-    <div className="absolute top-4 left-4">
-      <button
-        onClick={() => window.cloudinary.openUploadWidget()}
-        className="bg-blue-500 text-white px-4 py-2 rounded-md"
-      >
-        Video Yükle
-      </button>
-    </div>
+    <button onClick={() => widgetRef.current.open()} className="p-2 bg-blue-500 text-white">
+      Upload Image
+    </button>
   );
 };
 
