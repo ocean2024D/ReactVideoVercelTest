@@ -2,9 +2,16 @@ import React, { useState, useRef, useEffect } from "react";
 import v1 from "./assets/v1.mp4";
 import v2 from "./assets/v2.mp4";
 import v3 from "./assets/v3.mp4";
-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSpinner } from "@fortawesome/free-solid-svg-icons";
+import {
+  faHome,
+  faPlus,
+  faUser,
+  faHeart,
+  faCommentDots,
+  faShare,
+  faSpinner,
+} from "@fortawesome/free-solid-svg-icons";
 
 const videos = [v1, v2, v3];
 
@@ -12,9 +19,8 @@ function App() {
   const [progress, setProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const videoRefs = useRef([]);
-  const [loading, setLoading] = useState(videos.map(() => true));
   const [loadedVideos, setLoadedVideos] = useState([]);
-  const [videoError, setVideoError] = useState(null);
+  const [loading, setLoading] = useState(videos.map(() => true));
 
   const updateProgress = (index) => {
     if (videoRefs.current[index]) {
@@ -46,13 +52,18 @@ function App() {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
+          const videoIndex = entry.target.dataset.index;
+          const video = videoRefs.current[videoIndex];
+          
           if (entry.isIntersecting) {
             // When video comes into view, load it and play it
-            setLoadedVideos((prev) => [...new Set([...prev, entry.target.dataset.index])]);
-            videoRefs.current[entry.target.dataset.index].muted = false;
+            setLoadedVideos((prev) => [...new Set([...prev, videoIndex])]);
+            video.muted = false;
+            video.play();  // Play the video when it is in view
           } else {
-            // When video goes out of view, mute it
-            videoRefs.current[entry.target.dataset.index].muted = true;
+            // When video goes out of view, mute it and pause
+            video.muted = true;
+            video.pause();
           }
         });
       },
@@ -74,30 +85,15 @@ function App() {
     };
   }, []);
 
-  const handleVideoLoadError = (index) => {
-    setVideoError(`Video ${index + 1} failed to load.`);
-    setLoading((prev) => {
-      const newLoading = [...prev];
-      newLoading[index] = false;
-      return newLoading;
-    });
-  };
-
   return (
     <div className="h-screen w-full bg-black flex flex-col relative">
       <div className="flex-grow overflow-y-auto snap-mandatory snap-y">
         {videos.map((video, index) => (
           <div key={index} className="relative w-full h-screen snap-start flex justify-center items-center">
             {/* Loading Spinner */}
-            {loading[index] && !videoError && (
+            {loading[index] && (
               <div className="absolute flex items-center justify-center text-white">
                 <FontAwesomeIcon icon={faSpinner} size="3x" className="animate-spin" />
-              </div>
-            )}
-            {/* Error Message */}
-            {videoError && (
-              <div className="absolute flex items-center justify-center text-white">
-                <p className="text-xl">{videoError}</p>
               </div>
             )}
 
@@ -108,6 +104,7 @@ function App() {
               preload="auto" // Load video as fast as possible
               autoPlay={loadedVideos.includes(index.toString())}
               data-index={index}
+              src={loadedVideos.includes(index.toString()) ? video : ""}
               poster="https://via.placeholder.com/300"
               onClick={() => handlePlayPause(index)}
               onLoadedData={() => {
@@ -117,13 +114,7 @@ function App() {
                   return newLoading;
                 });
               }}
-              onError={() => handleVideoLoadError(index)}
-            >
-              <source src={loadedVideos.includes(index.toString()) ? video : ""} type="video/mp4" />
-              <source src={loadedVideos.includes(index.toString()) ? video.replace('.mp4', '.webm') : ""} type="video/webm" />
-              <source src={loadedVideos.includes(index.toString()) ? video.replace('.mp4', '.ogv') : ""} type="video/ogg" />
-              Your browser does not support the video tag.
-            </video>
+            ></video>
           </div>
         ))}
       </div>
