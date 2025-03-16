@@ -8,16 +8,21 @@ import {
   faHome,
   faPlus,
   faUser,
+  faHeart,
+  faCommentDots,
+  faShare,
 } from "@fortawesome/free-solid-svg-icons";
 
 const videos = [v1, v2, v3];
 
 function App() {
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [speed, setSpeed] = useState(1); // Video hızı (1: normal, 2: 2x hız, 0.5: yarım hız)
   const videoRef = useRef(null);
+  const [likes, setLikes] = useState(120);
+  const [comments, setComments] = useState(45);
+  const [shares, setShares] = useState(10);
+  const [liked, setLiked] = useState(false);
 
   const updateProgress = () => {
     if (videoRef.current) {
@@ -44,30 +49,25 @@ function App() {
     }
   };
 
-  const handleSpeedChange = () => {
-    const newSpeed = speed === 1 ? 2 : (speed === 2 ? 0.5 : 1); // hız döngüsü 1x -> 2x -> 0.5x -> 1x
-    setSpeed(newSpeed);
-    if (videoRef.current) {
-      videoRef.current.playbackRate = newSpeed; // Video hızını ayarla
-    }
+  const handleLike = () => {
+    setLiked(!liked);
+    setLikes(liked ? likes - 1 : likes + 1);
   };
 
-  // Video oynatmaya başlamak için useEffect ekleyelim
   useEffect(() => {
     const video = videoRef.current;
     if (video) {
       video.play();
     }
     video.addEventListener("timeupdate", updateProgress);
-
     return () => {
       video.removeEventListener("timeupdate", updateProgress);
     };
   }, []);
 
   return (
-    <div className="h-screen w-full bg-black flex flex-col relative ">
-      <div className="flex-grow overflow-y-auto snap-mandatory snap-y" style={{ scrollSnapType: "y mandatory" }}>
+    <div className="h-screen w-full bg-black flex flex-col relative">
+      <div className="flex-grow overflow-y-auto snap-mandatory snap-y">
         {videos.map((video, index) => (
           <div key={index} className="relative w-full h-screen snap-start">
             <video
@@ -75,15 +75,15 @@ function App() {
               className="w-full h-screen object-cover my-2"
               loop
               muted
-              autoPlay // Otomatik oynatma özelliği
+              autoPlay 
               src={video}
-              onClick={handlePlayPause} // Videoya tıklandığında oynat/durdur işlemi yapılacak
+              onClick={handlePlayPause}
             ></video>
           </div>
         ))}
       </div>
 
-      {/* Video Control Bar */}
+      {/* Video Progress Bar */}
       <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 w-full px-4">
         <input
           type="range"
@@ -95,7 +95,28 @@ function App() {
         />
       </div>
 
-      {/* Bottom Icons and Buy Button */}
+      {/* Right-Side Icons */}
+      <div className="absolute bottom-36 m-2 right-4 flex flex-col items-center gap-4 text-white">
+        {/* Like Button */}
+        <div className="flex flex-col items-center cursor-pointer" onClick={handleLike}>
+          <FontAwesomeIcon icon={faHeart} size="2x" className={liked ? "text-red-500" : "text-white"} />
+          <span className="text-sm">{likes}</span>
+        </div>
+
+        {/* Comment Button */}
+        <div className="flex flex-col items-center cursor-pointer">
+          <FontAwesomeIcon icon={faCommentDots} size="2x" />
+          <span className="text-sm">{comments}</span>
+        </div>
+
+        {/* Share Button */}
+        <div className="flex flex-col items-center cursor-pointer">
+          <FontAwesomeIcon icon={faShare} size="2x" />
+          <span className="text-sm">{shares}</span>
+        </div>
+      </div>
+
+      {/* Bottom Navigation */}
       <div className="flex justify-center gap-14 items-center text-white m-4 absolute bottom-0 left-1/2 transform -translate-x-1/2">
         <FontAwesomeIcon icon={faHome} size="lg" />
         <FontAwesomeIcon icon={faPlus} size="2x" className="text-white border-2 border-white rounded-full p-1" />
